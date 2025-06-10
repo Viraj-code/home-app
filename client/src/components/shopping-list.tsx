@@ -84,6 +84,19 @@ export function ShoppingListComponent() {
     }
   });
 
+  const deleteListMutation = useMutation({
+    mutationFn: async (listId: number) => {
+      return apiRequest("DELETE", `/api/shopping-lists/${listId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shopping-lists"] });
+      toast({
+        title: "Success",
+        description: "Shopping list deleted!"
+      });
+    }
+  });
+
   const handleAddItem = (listId: number) => {
     if (!newItemName.trim()) return;
     
@@ -168,6 +181,17 @@ export function ShoppingListComponent() {
                 >
                   <Plus className="w-4 h-4 mr-1" />
                   New List
+                </Button>
+              )}
+              {activeList && (
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => deleteListMutation.mutate(activeList.id)}
+                  disabled={deleteListMutation.isPending}
+                >
+                  <Trash2 className="w-4 h-4 mr-1" />
+                  Delete List
                 </Button>
               )}
             </div>

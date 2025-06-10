@@ -45,7 +45,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const createdBy = req.body.createdBy || 1; // Default to first user
       const meal = await storage.createMeal(validatedData, createdBy);
       res.status(201).json(meal);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: "Invalid meal data", error: error.message });
     }
   });
@@ -145,7 +145,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertMealPlanSchema.parse(req.body);
       const mealPlan = await storage.createMealPlan(validatedData);
       res.status(201).json(mealPlan);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: "Invalid meal plan data", error: error.message });
     }
   });
@@ -212,7 +212,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const createdBy = req.body.createdBy || 1;
       const activity = await storage.createActivity(validatedData, createdBy);
       res.status(201).json(activity);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: "Invalid activity data", error: error.message });
     }
   });
@@ -271,6 +271,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(list);
     } catch (error) {
       res.status(400).json({ message: "Invalid shopping list data", error: error.message });
+    }
+  });
+
+  app.delete("/api/shopping-lists/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteShoppingList(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Shopping list not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete shopping list" });
     }
   });
 
