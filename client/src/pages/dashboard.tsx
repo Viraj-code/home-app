@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { EnrichedMealPlan, EnrichedActivity, EnrichedShoppingList } from "@/types";
 import { useAuth } from "@/hooks/use-auth";
+import { Link } from "wouter";
 
 const activityColors = {
   sports: "bg-blue-100 text-blue-800",
@@ -119,10 +120,12 @@ export default function Dashboard() {
             <Bell className="w-4 h-4" />
             <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
           </Button>
-          <Button className="bg-primary hover:bg-primary/90">
-            <Plus className="w-4 h-4 mr-2" />
-            Quick Add
-          </Button>
+          <Link href="/meal-planning">
+            <Button className="bg-primary hover:bg-primary/90">
+              <Plus className="w-4 h-4 mr-2" />
+              Quick Add
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -196,9 +199,11 @@ export default function Dashboard() {
               <div className="text-center py-8 text-gray-500">
                 <Utensils className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                 <p className="mb-2">Visit the Meal Planning page to create your weekly meal schedule</p>
-                <Button className="bg-gradient-to-r from-primary to-secondary">
-                  Go to Meal Planning
-                </Button>
+                <Link href="/meal-planning">
+                  <Button className="bg-gradient-to-r from-primary to-secondary">
+                    Go to Meal Planning
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -249,9 +254,11 @@ export default function Dashboard() {
                 </div>
               )}
 
-              <Button variant="link" className="w-full mt-4 text-primary hover:text-primary/80">
-                View Full Calendar
-              </Button>
+              <Link href="/activities">
+                <Button variant="link" className="w-full mt-4 text-primary hover:text-primary/80">
+                  View Full Calendar
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 
@@ -300,9 +307,11 @@ export default function Dashboard() {
                 </div>
               )}
 
-              <Button variant="link" className="w-full mt-4 text-primary hover:text-primary/80">
-                View Full Shopping List
-              </Button>
+              <Link href="/shopping-lists">
+                <Button variant="link" className="w-full mt-4 text-primary hover:text-primary/80">
+                  View Full Shopping List
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 
@@ -313,22 +322,30 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" className="p-3 h-auto flex-col">
-                  <Utensils className="text-secondary w-5 h-5 mb-1" />
-                  <div className="text-xs">Add Meal</div>
-                </Button>
-                <Button variant="outline" className="p-3 h-auto flex-col">
-                  <CalendarPlus className="text-purple-600 w-5 h-5 mb-1" />
-                  <div className="text-xs">Add Activity</div>
-                </Button>
-                <Button variant="outline" className="p-3 h-auto flex-col">
-                  <Car className="text-blue-600 w-5 h-5 mb-1" />
-                  <div className="text-xs">Schedule Ride</div>
-                </Button>
-                <Button variant="outline" className="p-3 h-auto flex-col">
-                  <ShoppingBasket className="text-accent w-5 h-5 mb-1" />
-                  <div className="text-xs">Add Item</div>
-                </Button>
+                <Link href="/meal-planning">
+                  <Button variant="outline" className="p-3 h-auto flex-col w-full">
+                    <Utensils className="text-secondary w-5 h-5 mb-1" />
+                    <div className="text-xs">Add Meal</div>
+                  </Button>
+                </Link>
+                <Link href="/activities">
+                  <Button variant="outline" className="p-3 h-auto flex-col w-full">
+                    <CalendarPlus className="text-purple-600 w-5 h-5 mb-1" />
+                    <div className="text-xs">Add Activity</div>
+                  </Button>
+                </Link>
+                <Link href="/activities">
+                  <Button variant="outline" className="p-3 h-auto flex-col w-full">
+                    <Car className="text-blue-600 w-5 h-5 mb-1" />
+                    <div className="text-xs">Schedule Ride</div>
+                  </Button>
+                </Link>
+                <Link href="/shopping-lists">
+                  <Button variant="outline" className="p-3 h-auto flex-col w-full">
+                    <ShoppingBasket className="text-accent w-5 h-5 mb-1" />
+                    <div className="text-xs">Add Item</div>
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
