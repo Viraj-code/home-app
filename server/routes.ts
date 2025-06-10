@@ -114,12 +114,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else if (date) {
         mealPlans = await storage.getMealPlansByDate(date as string);
       } else {
-        // Get all meal plans for the current week
+        // Get all meal plans for the current week (Monday to Sunday)
         const today = new Date();
+        const monday = new Date(today.setDate(today.getDate() - today.getDay() + 1));
         const week = [];
         for (let i = 0; i < 7; i++) {
-          const date = new Date(today);
-          date.setDate(today.getDate() + i);
+          const date = new Date(monday);
+          date.setDate(monday.getDate() + i);
           const plans = await storage.getMealPlansByDate(date.toISOString().split('T')[0]);
           week.push(...plans);
         }
@@ -269,7 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const createdBy = req.body.createdBy || 1;
       const list = await storage.createShoppingList(validatedData, createdBy);
       res.status(201).json(list);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: "Invalid shopping list data", error: error.message });
     }
   });
@@ -318,7 +319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Add items to the list
       const items = [];
-      for (const ingredient of allIngredients) {
+      for (const ingredient of Array.from(allIngredients)) {
         const item = await storage.createShoppingItem({
           listId: shoppingList.id,
           name: ingredient,
@@ -341,7 +342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const addedBy = req.body.addedBy || 1;
       const item = await storage.createShoppingItem(validatedData, addedBy);
       res.status(201).json(item);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: "Invalid shopping item data", error: error.message });
     }
   });
@@ -355,7 +356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Shopping item not found" });
       }
       res.json(item);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: "Failed to update shopping item" });
     }
   });

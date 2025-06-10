@@ -94,8 +94,20 @@ export function MealPlanner() {
 
   const handleAddMeal = async (suggestion: MealSuggestion, mealType: string) => {
     try {
-      await createMealMutation.mutateAsync({ meal: suggestion, mealType });
+      const createdMeal: any = await createMealMutation.mutateAsync({ meal: suggestion, mealType });
+      
+      // If we have a selected date, also create a meal plan
+      if (selectedDate) {
+        await createMealPlanMutation.mutateAsync({
+          mealId: createdMeal.id,
+          plannedDate: selectedDate,
+          mealType,
+          userId: 1
+        });
+      }
+      
       setShowSuggestions(false);
+      setSelectedDate("");
     } catch (error) {
       toast({
         title: "Error",
@@ -181,7 +193,6 @@ export function MealPlanner() {
               <DialogTrigger asChild>
                 <Button 
                   className="bg-gradient-to-r from-primary to-secondary hover:shadow-lg transition-all"
-                  onClick={handleGenerateSuggestions}
                   disabled={isGenerating}
                 >
                   <Sparkles className="w-4 h-4 mr-1" />
