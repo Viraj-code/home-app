@@ -19,7 +19,8 @@ export async function generateMealSuggestions(
     });
 
     if (!response.ok) {
-      throw new Error("Failed to generate meal suggestions");
+      const error = await response.json();
+      throw new Error(error.message || "Failed to generate meal suggestions");
     }
 
     const suggestions = await response.json();

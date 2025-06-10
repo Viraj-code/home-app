@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Sparkles, Clock, Users } from "lucide-react";
-import { generateMealSuggestions } from "@/lib/openai";
+import { generateMealSuggestions } from "@/lib/gemini";
 import { EnrichedMealPlan, MealSuggestion } from "@/types";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
