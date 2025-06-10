@@ -24,6 +24,7 @@ const mealTypeColors = {
 export function MealPlanner() {
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
   const [selectedDietary, setSelectedDietary] = useState<string[]>([]);
+  const [selectedMealType, setSelectedMealType] = useState<string>("dinner");
   const [isGenerating, setIsGenerating] = useState(false);
   const [suggestions, setSuggestions] = useState<MealSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -35,10 +36,10 @@ export function MealPlanner() {
   });
 
   const createMealMutation = useMutation({
-    mutationFn: async (meal: MealSuggestion) => {
+    mutationFn: async (data: { meal: MealSuggestion; mealType: string }) => {
       return apiRequest("POST", "/api/meals", {
-        ...meal,
-        mealType: "dinner"
+        ...data.meal,
+        mealType: data.mealType
       });
     },
     onSuccess: () => {
@@ -69,7 +70,7 @@ export function MealPlanner() {
       const newSuggestions = await generateMealSuggestions(
         selectedCuisines,
         selectedDietary,
-        "dinner"
+        selectedMealType
       );
       setSuggestions(newSuggestions);
       setShowSuggestions(true);
@@ -84,9 +85,9 @@ export function MealPlanner() {
     }
   };
 
-  const handleAddMeal = async (suggestion: MealSuggestion) => {
+  const handleAddMeal = async (suggestion: MealSuggestion, mealType: string) => {
     try {
-      await createMealMutation.mutateAsync(suggestion);
+      await createMealMutation.mutateAsync({ meal: suggestion, mealType });
     } catch (error) {
       toast({
         title: "Error",
@@ -162,6 +163,25 @@ export function MealPlanner() {
                 </DialogHeader>
                 
                 <div className="space-y-4">
+                  {/* Meal Type Selection */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Meal Type
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {["breakfast", "brunch", "lunch", "dinner", "snack"].map((mealType) => (
+                        <Button
+                          key={mealType}
+                          variant={selectedMealType === mealType ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setSelectedMealType(mealType)}
+                        >
+                          {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Preference Selection */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -235,7 +255,7 @@ export function MealPlanner() {
                             </div>
                             <Button
                               size="sm"
-                              onClick={() => handleAddMeal(suggestion)}
+                              onClick={() => handleAddMeal(suggestion, selectedMealType)}
                               disabled={createMealMutation.isPending}
                             >
                               Add
