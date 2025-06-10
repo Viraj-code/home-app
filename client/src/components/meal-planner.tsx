@@ -28,11 +28,18 @@ export function MealPlanner() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [suggestions, setSuggestions] = useState<MealSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showMealSelector, setShowMealSelector] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>("");
   const { toast } = useToast();
 
   // Get current week's meal plans
   const { data: mealPlans, isLoading } = useQuery<EnrichedMealPlan[]>({
     queryKey: ["/api/meal-plans"],
+  });
+
+  // Get all available meals
+  const { data: availableMeals } = useQuery({
+    queryKey: ["/api/meals"],
   });
 
   const createMealMutation = useMutation({
@@ -88,10 +95,34 @@ export function MealPlanner() {
   const handleAddMeal = async (suggestion: MealSuggestion, mealType: string) => {
     try {
       await createMealMutation.mutateAsync({ meal: suggestion, mealType });
+      setShowSuggestions(false);
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to add meal. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDayClick = (date: string) => {
+    setSelectedDate(date);
+    setShowMealSelector(true);
+  };
+
+  const handleScheduleMeal = async (mealId: number, mealType: string) => {
+    try {
+      await createMealPlanMutation.mutateAsync({
+        mealId,
+        plannedDate: selectedDate,
+        mealType,
+        userId: 1 // Default user
+      });
+      setShowMealSelector(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to schedule meal. Please try again.",
         variant: "destructive"
       });
     }
@@ -318,7 +349,10 @@ export function MealPlanner() {
                   ))}
                   
                   {dayMeals.length === 0 && (
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                    <div 
+                      className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-gray-400 hover:bg-gray-50 transition-colors"
+                      onClick={() => handleDayClick(date)}
+                    >
                       <Plus className="w-4 h-4 text-gray-400 mx-auto" />
                       <div className="text-xs text-gray-400 mt-1">Add meal</div>
                     </div>
@@ -343,6 +377,66 @@ export function MealPlanner() {
             </div>
           </div>
         </div>
+
+        {/* Meal Selection Dialog */}
+        <Dialog open={showMealSelector} onOpenChange={setShowMealSelector}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Add Meal to {selectedDate}</DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              {availableMeals && availableMeals.length > 0 ? (
+                <div className="grid gap-3 max-h-96 overflow-y-auto">
+                  {availableMeals.map((meal: any) => (
+                    <div key={meal.id} className="border rounded-lg p-3 hover:bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-medium">{meal.name}</h4>
+                          <p className="text-sm text-gray-600">{meal.description}</p>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <span className={`px-2 py-1 text-xs rounded-full ${
+                              mealTypeColors[meal.mealType as keyof typeof mealTypeColors] || 
+                              "bg-gray-100 text-gray-800"
+                            }`}>
+                              {meal.mealType}
+                            </span>
+                            {meal.cuisine && (
+                              <span className="text-xs text-gray-500">{meal.cuisine}</span>
+                            )}
+                            <span className="text-xs text-gray-500">
+                              {meal.prepTimeMinutes} min
+                            </span>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => handleScheduleMeal(meal.id, meal.mealType)}
+                          disabled={createMealPlanMutation.isPending}
+                        >
+                          Add to Day
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-500 mb-4">No meals available. Create some meals first using AI suggestions.</p>
+                  <Button 
+                    onClick={() => {
+                      setShowMealSelector(false);
+                      setShowSuggestions(true);
+                    }}
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Get AI Suggestions
+                  </Button>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
