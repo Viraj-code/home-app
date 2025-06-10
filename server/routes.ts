@@ -209,7 +209,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/activities", async (req, res) => {
     try {
-      const validatedData = insertActivitySchema.parse(req.body);
+      // Convert string dates to Date objects before validation
+      const activityData = {
+        ...req.body,
+        startTime: new Date(req.body.startTime),
+        endTime: req.body.endTime ? new Date(req.body.endTime) : undefined,
+      };
+      
+      const validatedData = insertActivitySchema.parse(activityData);
       const createdBy = req.body.createdBy || 1;
       const activity = await storage.createActivity(validatedData, createdBy);
       res.status(201).json(activity);

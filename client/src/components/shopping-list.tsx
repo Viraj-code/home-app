@@ -146,22 +146,14 @@ export function ShoppingListComponent() {
     );
   }
 
-  const activeList = shoppingLists?.[0];
-
   return (
     <div className="space-y-6">
-      {/* Current Shopping List */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center space-x-2">
               <ShoppingCart className="w-5 h-5" />
-              <span>Shopping List</span>
-              {activeList && (
-                <Badge variant="outline" className="bg-accent/10 text-accent">
-                  Auto-generated
-                </Badge>
-              )}
+              <span>Shopping Lists</span>
             </CardTitle>
             <div className="flex items-center space-x-2">
               <Button
@@ -173,32 +165,19 @@ export function ShoppingListComponent() {
                 <ShoppingCart className="w-4 h-4 mr-1" />
                 {generateListMutation.isPending ? "Generating..." : "Generate from Meals"}
               </Button>
-              {!activeList && (
-                <Button
-                  size="sm"
-                  onClick={() => createListMutation.mutate()}
-                  disabled={createListMutation.isPending}
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  New List
-                </Button>
-              )}
-              {activeList && (
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => deleteListMutation.mutate(activeList.id)}
-                  disabled={deleteListMutation.isPending}
-                >
-                  <Trash2 className="w-4 h-4 mr-1" />
-                  Delete List
-                </Button>
-              )}
+              <Button
+                size="sm"
+                onClick={() => createListMutation.mutate()}
+                disabled={createListMutation.isPending}
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                New List
+              </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          {!activeList ? (
+          {!shoppingLists || shoppingLists.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <ShoppingCart className="w-12 h-12 mx-auto mb-2 text-gray-300" />
               <p>No shopping lists yet</p>
@@ -206,136 +185,97 @@ export function ShoppingListComponent() {
             </div>
           ) : (
             <div className="space-y-4">
-              {/* Add new item */}
-              <div className="flex space-x-2">
-                <Input
-                  placeholder="Add item..."
-                  value={newItemName}
-                  onChange={(e) => setNewItemName(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleAddItem(activeList.id)}
-                  className="flex-1"
-                />
-                <Input
-                  placeholder="Qty"
-                  value={newItemQuantity}
-                  onChange={(e) => setNewItemQuantity(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleAddItem(activeList.id)}
-                  className="w-20"
-                />
-                <Button
-                  onClick={() => handleAddItem(activeList.id)}
-                  disabled={!newItemName.trim() || addItemMutation.isPending}
-                  size="sm"
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-
-              {/* Shopping items */}
-              <div className="space-y-3">
-                {activeList.items.length === 0 ? (
-                  <p className="text-center text-gray-500 py-4">No items in this list</p>
-                ) : (
-                  activeList.items.map((item) => (
-                    <div key={item.id} className="flex items-center space-x-3 p-2 rounded-lg border border-gray-200">
-                      <Checkbox
-                        checked={item.completed || false}
-                        onCheckedChange={(checked) => handleToggleItem(item.id, !!checked)}
-                      />
-                      <span className={`flex-1 ${item.completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>
-                        {item.name}
-                      </span>
-                      {item.quantity && (
-                        <span className="text-xs text-gray-500">({item.quantity})</span>
-                      )}
-                      {item.relatedMeal && (
+              {shoppingLists.map((list) => (
+                <Card key={list.id} className="border-l-4 border-l-primary">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-medium">{list.name}</h3>
                         <Badge variant="outline" className="text-xs">
-                          {item.relatedMeal}
+                          {list.items.length} items
                         </Badge>
-                      )}
+                        <Badge variant="outline" className="text-xs">
+                          {list.items.filter(item => item.completed).length} completed
+                        </Badge>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => exportList(list)}
+                        >
+                          <Download className="w-4 h-4 mr-1" />
+                          Export
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => deleteListMutation.mutate(list.id)}
+                          disabled={deleteListMutation.isPending}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                  ))
-                )}
-              </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex space-x-2 mb-4">
+                      <Input
+                        placeholder="Add item..."
+                        value={newItemName}
+                        onChange={(e) => setNewItemName(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleAddItem(list.id)}
+                        className="flex-1"
+                      />
+                      <Input
+                        placeholder="Qty"
+                        value={newItemQuantity}
+                        onChange={(e) => setNewItemQuantity(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleAddItem(list.id)}
+                        className="w-20"
+                      />
+                      <Button
+                        onClick={() => handleAddItem(list.id)}
+                        disabled={!newItemName.trim() || addItemMutation.isPending}
+                        size="sm"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </div>
 
-              {/* List actions */}
-              {activeList.items.length > 0 && (
-                <div className="flex space-x-2 pt-4 border-t border-gray-200">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => exportList(activeList)}
-                    className="flex-1"
-                  >
-                    <Download className="w-4 h-4 mr-1" />
-                    Export List
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-gray-600"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
-
-              {/* Shopping stats */}
-              <div className="bg-gray-50 rounded-lg p-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Total items:</span>
-                  <span className="font-medium">{activeList.items.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Completed:</span>
-                  <span className="font-medium">
-                    {activeList.items.filter(item => item.completed).length}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Remaining:</span>
-                  <span className="font-medium">
-                    {activeList.items.filter(item => !item.completed).length}
-                  </span>
-                </div>
-              </div>
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                      {list.items.map((item) => (
+                        <div
+                          key={item.id}
+                          className={`flex items-center space-x-3 p-2 rounded-lg border ${
+                            item.completed ? "bg-gray-50 text-gray-500" : "bg-white"
+                          }`}
+                        >
+                          <Checkbox
+                            checked={item.completed || false}
+                            onCheckedChange={(checked) => handleToggleItem(item.id, checked as boolean)}
+                          />
+                          <div className="flex-1">
+                            <span className={item.completed ? "line-through" : ""}>{item.name}</span>
+                            {item.quantity && (
+                              <span className="text-sm text-gray-500 ml-2">({item.quantity})</span>
+                            )}
+                          </div>
+                          {item.category && (
+                            <Badge variant="secondary" className="text-xs">
+                              {item.category}
+                            </Badge>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           )}
         </CardContent>
       </Card>
-
-      {/* All Shopping Lists */}
-      {shoppingLists && shoppingLists.length > 1 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>All Shopping Lists</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {shoppingLists.map((list) => (
-                <div key={list.id} className="flex items-center justify-between p-3 rounded-lg border border-gray-200">
-                  <div>
-                    <h4 className="font-medium text-gray-900">{list.name}</h4>
-                    <p className="text-sm text-gray-500">
-                      {list.items.length} items • {list.items.filter(item => item.completed).length} completed
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {list.completed && (
-                      <Badge variant="outline" className="bg-green-50 text-green-700">
-                        Completed
-                      </Badge>
-                    )}
-                    <Button size="sm" variant="outline">
-                      View
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

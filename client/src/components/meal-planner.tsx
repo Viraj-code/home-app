@@ -371,15 +371,14 @@ export function MealPlanner() {
                     </div>
                   ))}
                   
-                  {dayMeals.length === 0 && (
-                    <div 
-                      className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-gray-400 hover:bg-gray-50 transition-colors"
-                      onClick={() => handleDayClick(date)}
-                    >
-                      <Plus className="w-4 h-4 text-gray-400 mx-auto" />
-                      <div className="text-xs text-gray-400 mt-1">Add meal</div>
-                    </div>
-                  )}
+                  
+                  <div 
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-2 text-center cursor-pointer hover:border-gray-400 hover:bg-gray-50 transition-colors"
+                    onClick={() => handleDayClick(date)}
+                  >
+                    <Plus className="w-3 h-3 text-gray-400 mx-auto" />
+                    <div className="text-xs text-gray-400 mt-1">Add meal</div>
+                  </div>
                 </div>
               </div>
             );
