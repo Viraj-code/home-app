@@ -38,7 +38,7 @@ export function MealPlanner() {
   });
 
   // Get all available meals
-  const { data: availableMeals } = useQuery({
+  const { data: availableMeals = [] } = useQuery({
     queryKey: ["/api/meals"],
   });
 
@@ -295,13 +295,25 @@ export function MealPlanner() {
                                 </div>
                               </div>
                             </div>
-                            <Button
-                              size="sm"
-                              onClick={() => handleAddMeal(suggestion, selectedMealType)}
-                              disabled={createMealMutation.isPending}
-                            >
-                              Add
-                            </Button>
+                            <div className="flex space-x-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleAddMeal(suggestion, selectedMealType)}
+                                disabled={createMealMutation.isPending}
+                              >
+                                Save Meal
+                              </Button>
+                              {selectedDate && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleAddMeal(suggestion, selectedMealType)}
+                                  disabled={createMealMutation.isPending}
+                                >
+                                  Add to {new Date(selectedDate).toLocaleDateString()}
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -397,7 +409,7 @@ export function MealPlanner() {
             </DialogHeader>
             
             <div className="space-y-4">
-              {availableMeals && availableMeals.length > 0 ? (
+              {Array.isArray(availableMeals) && availableMeals.length > 0 ? (
                 <div className="grid gap-3 max-h-96 overflow-y-auto">
                   {availableMeals.map((meal: any) => (
                     <div key={meal.id} className="border rounded-lg p-3 hover:bg-gray-50">
